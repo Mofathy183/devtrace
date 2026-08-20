@@ -1,16 +1,9 @@
 /**
  * @module lib/use-api-data
  * A small client-side hook wrapping `apiGet` with loading/error/data
- * state, so every page follows the same fetch-render pattern instead of
- * re-deriving `useState` + `useEffect` boilerplate per view.
- *
- * @remarks
- * The effect below never calls `setState` synchronously in its body —
- * only inside the `.then`/`.catch` callbacks of the fetch promise. This
- * satisfies `react-hooks/set-state-in-effect`: "loading" is derived by
- * comparing the request currently in flight (`requestKey`) against the
- * key of the last request that actually resolved (`state.key`), rather
- * than being reset with an eager `setState` at the top of the effect.
+ * state. Exposes both a human-readable `error` message and the raw
+ * `errorCode` (e.g. `NOT_FOUND`) so callers can branch on failure type
+ * without parsing the message.
  */
 'use client';
 
@@ -21,20 +14,15 @@ type UseApiDataResult<T> = {
 	data: T | null;
 	loading: boolean;
 	error: string | null;
+	errorCode: string | null;
 	refetch: () => void;
 };
 
 type FetchState<T> =
 	| { key: number; status: 'success'; data: T }
-	| { key: number; status: 'error'; message: string }
+	| { key: number; status: 'error'; message: string; code: string }
 	| { key: -1; status: 'idle' };
 
-/**
- * Fetches `path` on mount and exposes `{ data, loading, error, refetch }`.
- *
- * @param path - The API path to GET.
- * @returns The current fetch state and a `refetch` function for retry buttons.
- */
 export function useApiData<T>(path: string): UseApiDataResult<T> {
 	const [attempt, setAttempt] = useState(0);
 	const [state, setState] = useState<FetchState<T>>({
@@ -60,11 +48,13 @@ export function useApiData<T>(path: string): UseApiDataResult<T> {
 			})
 			.catch((err: unknown) => {
 				if (cancelled) return;
+				const code =
+					err instanceof ApiClientError ? err.code : 'UNKNOWN';
 				const message =
 					err instanceof ApiClientError
 						? err.message
 						: 'Something went wrong loading this data.';
-				setState({ key: requestKey, status: 'error', message });
+				setState({ key: requestKey, status: 'error', message, code });
 			});
 
 		return () => {
@@ -78,6 +68,7 @@ export function useApiData<T>(path: string): UseApiDataResult<T> {
 		data: !loading && state.status === 'success' ? state.data : null,
 		loading,
 		error: !loading && state.status === 'error' ? state.message : null,
+		errorCode: !loading && state.status === 'error' ? state.code : null,
 		refetch,
 	};
 }

@@ -6,6 +6,7 @@
  * exists to make natural, since it's the one that gets painful as a
  * recursive CTE in a relational schema.
  */
+import type { Path } from 'neo4j-driver';
 import { runQuery } from '../db';
 
 /** One row of {@link getProjectInfluence}'s result set. */
@@ -37,7 +38,7 @@ export async function getProjectInfluence(
 ) {
 	return runner<InfluenceRow>(
 		`MATCH (earlier:Project)-[:TAUGHT_LESSON]->(l:Lesson)-[:INFORMED]->(target:Project {id: $projectId})-[:USES]->(t:Technology)
-     RETURN l.title AS lessonTitle, earlier.name AS fromProject, t.name AS technology`,
+     	RETURN l.title AS lessonTitle, earlier.name AS fromProject, t.name AS technology`,
 		{ projectId }
 	);
 }
@@ -63,7 +64,7 @@ export async function getInfluenceChains(
 	maxDepth = 5,
 	runner: typeof runQuery = runQuery
 ) {
-	return runner<{ path: unknown }>(
+	return runner<{ path: Path }>(
 		`MATCH path = (start:Project)-[:TAUGHT_LESSON|INFORMED*1..${maxDepth * 2}]->(end:Project)
      WHERE start <> end
      RETURN path
