@@ -38,7 +38,7 @@ export async function getProjectInfluence(
 ) {
 	return runner<InfluenceRow>(
 		`MATCH (earlier:Project)-[:TAUGHT_LESSON]->(l:Lesson)-[:INFORMED]->(target:Project {id: $projectId})-[:USES]->(t:Technology)
-     	RETURN l.title AS lessonTitle, earlier.name AS fromProject, t.name AS technology`,
+    	RETURN l.title AS lessonTitle, earlier.name AS fromProject, t.name AS technology`,
 		{ projectId }
 	);
 }
@@ -66,9 +66,40 @@ export async function getInfluenceChains(
 ) {
 	return runner<{ path: Path }>(
 		`MATCH path = (start:Project)-[:TAUGHT_LESSON|INFORMED*1..${maxDepth * 2}]->(end:Project)
-     WHERE start <> end
-     RETURN path
-     LIMIT 25`,
+		WHERE start <> end
+		RETURN path
+		LIMIT 25`,
 		{}
+	);
+}
+
+/** One row of {@link getProjectTaughtLessons}'s result set. */
+export type TaughtRow = {
+	lessonTitle: string;
+	toProject: string;
+};
+
+/**
+ * Outgoing influence: lessons taught by the given project that went on to
+ * inform a later project. This is the mirror of {@link getProjectInfluence}
+ * — that function answers "what influenced this project," this answers
+ * "what did this project teach forward." An origin project (nothing
+ * preceded it) will always return an empty array from
+ * {@link getProjectInfluence} but can still return real rows here.
+ *
+ * @param projectId - The `Project.id` whose taught lessons to look up.
+ * @param runner - Optional override for the query executor; used by unit
+ *   tests to inject a fake without a real driver. Defaults to {@link runQuery}.
+ * @returns Rows of `{ lessonTitle, toProject }`, one per lesson→informed-project edge.
+ * @throws {DbUnavailableError} If the underlying query fails (propagated from `runQuery`/`runner`).
+ */
+export async function getProjectTaughtLessons(
+	projectId: string,
+	runner: typeof runQuery = runQuery
+) {
+	return runner<TaughtRow>(
+		`MATCH (source:Project {id: $projectId})-[:TAUGHT_LESSON]->(l:Lesson)-[:INFORMED]->(later:Project)
+		RETURN l.title AS lessonTitle, later.name AS toProject`,
+		{ projectId }
 	);
 }
