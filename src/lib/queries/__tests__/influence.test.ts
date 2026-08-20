@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import {
 	getProjectInfluence,
 	getInfluenceChains,
+	getProjectTaughtLessons,
 } from '@/lib/queries/influence';
 
 describe('getProjectInfluence', () => {
@@ -72,5 +73,39 @@ describe('getInfluenceChains', () => {
 
 		const [cypher] = runner.mock.calls[0];
 		expect(cypher).toContain('start <> end');
+	});
+});
+
+describe('getProjectTaughtLessons', () => {
+	it("queries by the given projectId and returns the runner's rows unchanged", async () => {
+		const fakeRows = [
+			{
+				lessonTitle: 'Concurrent writes need guards',
+				toProject: 'PyLedger',
+			},
+		];
+		const runner = vi.fn().mockResolvedValue(fakeRows);
+
+		expect(await getProjectTaughtLessons('beggy', runner)).toEqual(
+			fakeRows
+		);
+	});
+
+	it('passes projectId as a query parameter, never interpolated into the Cypher string', async () => {
+		const runner = vi.fn().mockResolvedValue([]);
+		await getProjectTaughtLessons('beggy', runner);
+
+		const [cypher, params] = runner.mock.calls[0];
+		expect(cypher).not.toContain('beggy');
+		expect(params).toEqual({ projectId: 'beggy' });
+	});
+
+	it('traverses source project -> Lesson -> later project', async () => {
+		const runner = vi.fn().mockResolvedValue([]);
+		await getProjectTaughtLessons('beggy', runner);
+
+		const [cypher] = runner.mock.calls[0];
+		expect(cypher).toContain('TAUGHT_LESSON');
+		expect(cypher).toContain('INFORMED');
 	});
 });
