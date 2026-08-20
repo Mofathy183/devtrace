@@ -6,9 +6,9 @@
  * envelope and HTTP status. This is the single source of truth every
  * route's `@throws` documentation points back to.
  */
-import { NextResponse } from "next/server";
-import { ZodError } from "zod";
-import { DbConfigError, DbUnavailableError } from "./db";
+import { NextResponse } from 'next/server';
+import { ZodError } from 'zod';
+import { DbConfigError, DbUnavailableError } from './db';
 
 /**
  * Every error condition a route can deliberately return. Kept as a
@@ -16,19 +16,19 @@ import { DbConfigError, DbUnavailableError } from "./db";
  * is a compile error, not a silent mismatch with client-side handling.
  */
 export type ErrorCode =
-  | "VALIDATION_ERROR"
-  | "NOT_FOUND"
-  | "DB_UNAVAILABLE"
-  | "DB_CONFIG_ERROR"
-  | "INTERNAL_ERROR";
+	| 'VALIDATION_ERROR'
+	| 'NOT_FOUND'
+	| 'DB_UNAVAILABLE'
+	| 'DB_CONFIG_ERROR'
+	| 'INTERNAL_ERROR';
 
 /** Envelope shape returned by every successful route response. */
 export type ApiSuccess<T> = { ok: true; data: T };
 
 /** Envelope shape returned by every failed route response. */
 export type ApiFailure = {
-  ok: false;
-  error: { code: ErrorCode; message: string };
+	ok: false;
+	error: { code: ErrorCode; message: string };
 };
 
 /**
@@ -43,8 +43,8 @@ export type ApiFailure = {
  * @returns A `NextResponse` with the success envelope as its JSON body.
  */
 export function success<T>(data: T, status = 200) {
-  const body: ApiSuccess<T> = { ok: true, data };
-  return NextResponse.json(body, { status });
+	const body: ApiSuccess<T> = { ok: true, data };
+	return NextResponse.json(body, { status });
 }
 
 /**
@@ -59,8 +59,8 @@ export function success<T>(data: T, status = 200) {
  * @returns A `NextResponse` with the failure envelope as its JSON body.
  */
 export function failure(code: ErrorCode, message: string, status: number) {
-  const body: ApiFailure = { ok: false, error: { code, message } };
-  return NextResponse.json(body, { status });
+	const body: ApiFailure = { ok: false, error: { code, message } };
+	return NextResponse.json(body, { status });
 }
 
 /**
@@ -82,19 +82,23 @@ export function failure(code: ErrorCode, message: string, status: number) {
  * @throws {ZodError} → 400 `VALIDATION_ERROR`
  */
 export function handleRouteError(err: unknown) {
-  if (err instanceof ZodError) {
-    return failure("VALIDATION_ERROR", err.issues.map((i) => i.message).join(", "), 400);
-  }
-  if (err instanceof DbUnavailableError) {
-    return failure(
-      "DB_UNAVAILABLE",
-      "CognoDB is unreachable right now. Please try again shortly.",
-      503
-    );
-  }
-  if (err instanceof DbConfigError) {
-    return failure("DB_CONFIG_ERROR", "Server misconfiguration.", 500);
-  }
-  console.error("Unhandled route error:", err);
-  return failure("INTERNAL_ERROR", "Something went wrong.", 500);
+	if (err instanceof ZodError) {
+		return failure(
+			'VALIDATION_ERROR',
+			err.issues.map((i) => i.message).join(', '),
+			400
+		);
+	}
+	if (err instanceof DbUnavailableError) {
+		return failure(
+			'DB_UNAVAILABLE',
+			'CognoDB is unreachable right now. Please try again shortly.',
+			503
+		);
+	}
+	if (err instanceof DbConfigError) {
+		return failure('DB_CONFIG_ERROR', 'Server misconfiguration.', 500);
+	}
+	console.error('Unhandled route error:', err);
+	return failure('INTERNAL_ERROR', 'Something went wrong.', 500);
 }
