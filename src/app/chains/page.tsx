@@ -1,20 +1,19 @@
 /**
  * @module app/chains/page
  * Surfaces the variable-length path query — arbitrary-depth chains of
- * influence between projects. Raw path data for now; the force-graph
- * render is a later polish pass (see build plan, Hr 28+).
+ * influence between projects — as an SVG diagram per chain.
  */
 'use client';
 
 import Link from 'next/link';
 import { useApiData } from '@/lib/useApiData';
 import { LoadingState, EmptyState, ErrorState } from '@/components/state-views';
-
-type ChainRow = { path: unknown };
+import { ChainGraph } from '@/components/chain-graph';
+import type { ChainResult } from '@/lib/queries/serialize-path';
 
 export default function ChainsPage() {
 	const { data, loading, error, refetch } =
-		useApiData<ChainRow[]>('/api/chains');
+		useApiData<ChainResult[]>('/api/chains');
 
 	return (
 		<main className="mx-auto max-w-3xl px-6 py-16">
@@ -53,13 +52,16 @@ export default function ChainsPage() {
 			)}
 
 			{!loading && !error && data && data.length > 0 && (
-				<p className="text-sm text-zinc-500">
-					Found {data.length} chain{data.length === 1 ? '' : 's'}. A
-					visual path render is coming in a later pass — raw path data
-					is available via{' '}
-					<code className="text-emerald-400">/api/chains</code> in the
-					meantime.
-				</p>
+				<ul className="flex flex-col gap-5">
+					{data.map((chain, i) => (
+						<li
+							key={i}
+							className="overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-900/40 px-5 py-4"
+						>
+							<ChainGraph chain={chain} />
+						</li>
+					))}
+				</ul>
 			)}
 		</main>
 	);
