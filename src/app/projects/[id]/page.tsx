@@ -2,8 +2,9 @@
  * @module app/projects/[id]/page
  * Project detail view — fetches the project's real name/summary (rather
  * than deriving a display name from the URL slug) alongside the
- * multi-hop influence query result, and renders a distinct "not found"
- * state when the id doesn't match any project.
+ * multi-hop influence query result and its outgoing mirror (lessons this
+ * project taught forward), and renders a distinct "not found" state when
+ * the id doesn't match any project.
  */
 'use client';
 
@@ -25,6 +26,11 @@ type ProjectRow = {
 	startedAt: string;
 };
 
+type TaughtRow = {
+	lessonTitle: string;
+	toProject: string;
+};
+
 export default function ProjectInfluencePage({
 	params,
 }: {
@@ -35,8 +41,9 @@ export default function ProjectInfluencePage({
 	const influence = useApiData<InfluenceRow[]>(
 		`/api/projects/${id}/influence`
 	);
+	const taught = useApiData<TaughtRow[]>(`/api/projects/${id}/taught`);
 
-	const loading = project.loading || influence.loading;
+	const loading = project.loading || influence.loading || taught.loading;
 	const notFound = !project.loading && project.errorCode === 'NOT_FOUND';
 
 	return (
@@ -121,6 +128,53 @@ export default function ProjectInfluencePage({
 								))}
 							</ul>
 						)}
+
+					<section className="mt-12">
+						<h2 className="mb-4 text-xs font-medium uppercase tracking-wide text-emerald-400">
+							Taught forward
+						</h2>
+
+						{taught.error && (
+							<ErrorState
+								message={taught.error}
+								onRetry={taught.refetch}
+							/>
+						)}
+
+						{!taught.error &&
+							taught.data &&
+							taught.data.length === 0 && (
+								<EmptyState
+									title="Nothing taught forward yet"
+									description="No lesson from this project has informed a later one yet."
+								/>
+							)}
+
+						{!taught.error &&
+							taught.data &&
+							taught.data.length > 0 && (
+								<ul className="flex flex-col gap-3">
+									{taught.data.map((row, i) => (
+										<li
+											key={`${row.lessonTitle}-${row.toProject}-${i}`}
+											className="rounded-lg border border-zinc-800 bg-zinc-900/40 px-5 py-4"
+										>
+											<div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs">
+												<span className="rounded bg-emerald-900/40 px-2 py-0.5 text-emerald-300">
+													{row.lessonTitle}
+												</span>
+												<span className="text-zinc-600">
+													taught →
+												</span>
+												<span className="rounded bg-zinc-800 px-2 py-0.5 text-zinc-300">
+													{row.toProject}
+												</span>
+											</div>
+										</li>
+									))}
+								</ul>
+							)}
+					</section>
 				</>
 			)}
 		</main>
