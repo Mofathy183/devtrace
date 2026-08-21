@@ -4,13 +4,14 @@
  * loading, empty, and error. Built once here so every page composes the
  * same visual language instead of reinventing spinners/messages per view.
  */
+import type { ReactNode } from 'react';
 
 /** Shown while a view's initial data fetch is in flight. */
 export function LoadingState({ label = 'Loading…' }: { label?: string }) {
 	return (
 		<div className="flex items-center justify-center gap-3 py-16 text-sm text-zinc-500">
 			<span
-				className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-emerald-400"
+				className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-accent"
 				aria-hidden="true"
 			/>
 			<span>{label}</span>
@@ -27,7 +28,7 @@ export function EmptyState({
 	description,
 }: {
 	title: string;
-	description: string;
+	description: ReactNode;
 }) {
 	return (
 		<div className="rounded-lg border border-zinc-800 bg-zinc-900/40 px-6 py-14 text-center">
