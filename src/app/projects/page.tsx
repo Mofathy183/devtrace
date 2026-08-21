@@ -23,10 +23,10 @@ export default function ProjectsPage() {
 	return (
 		<main className="mx-auto max-w-3xl px-6 py-16">
 			<header className="mb-10">
-				<p className="mb-2 text-xs font-medium uppercase tracking-wide text-emerald-400">
+				<p className="mb-2 text-xs font-medium uppercase tracking-wide text-accent">
 					Engineering decision graph
 				</p>
-				<h1 className="text-2xl font-semibold text-zinc-50">
+				<h1 className="font-display text-2xl font-semibold text-zinc-50">
 					Projects
 				</h1>
 				<p className="mt-2 text-sm text-zinc-500">
@@ -44,7 +44,15 @@ export default function ProjectsPage() {
 			{!loading && !error && data && data.length === 0 && (
 				<EmptyState
 					title="No projects yet"
-					description="Run the seed script to load the project graph into CognoDB."
+					description={
+						<>
+							Run{' '}
+							<code className="rounded bg-zinc-800 px-1.5 py-0.5 font-mono text-xs text-zinc-300">
+								pnpm seed
+							</code>{' '}
+							to load the project graph.
+						</>
+					}
 				/>
 			)}
 

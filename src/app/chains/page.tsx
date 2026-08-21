@@ -1,7 +1,9 @@
 /**
  * @module app/chains/page
- * Surfaces the variable-length path query — arbitrary-depth chains of
- * influence between projects — as an SVG diagram per chain.
+ * Surfaces the variable-length path query as an SVG diagram per chain.
+ * The longest chain is featured as a hero with a one-line summary of
+ * what it shows — the app's actual thesis, stated once, up front —
+ * with the remaining chains demoted to a secondary list.
  */
 'use client';
 
@@ -11,9 +13,23 @@ import { LoadingState, EmptyState, ErrorState } from '@/components/state-views';
 import { ChainGraph } from '@/components/chain-graph';
 import type { ChainResult } from '@/lib/queries/serialize-path';
 
+function longestFirst(chains: ChainResult[]): ChainResult[] {
+	return [...chains].sort((a, b) => b.nodes.length - a.nodes.length);
+}
+
+function summarize(chain: ChainResult): string {
+	const first = chain.nodes[0]?.name ?? 'an earlier project';
+	const last = chain.nodes[chain.nodes.length - 1]?.name ?? 'a later one';
+	const hops = chain.steps.length;
+	return `It took ${hops} hop${hops === 1 ? '' : 's'} for a decision in ${first} to reach ${last}.`;
+}
+
 export default function ChainsPage() {
 	const { data, loading, error, refetch } =
 		useApiData<ChainResult[]>('/api/chains');
+
+	const ordered = data ? longestFirst(data) : [];
+	const [hero, ...rest] = ordered;
 
 	return (
 		<main className="mx-auto max-w-3xl px-6 py-16">
@@ -25,10 +41,10 @@ export default function ChainsPage() {
 			</Link>
 
 			<header className="mb-10">
-				<p className="mb-2 text-xs font-medium uppercase tracking-wide text-emerald-400">
+				<p className="mb-2 text-xs font-medium uppercase tracking-wide text-accent">
 					Variable-length traversal
 				</p>
-				<h1 className="text-2xl font-semibold text-zinc-50">
+				<h1 className="font-display text-2xl font-semibold text-zinc-50">
 					Influence chains
 				</h1>
 				<p className="mt-2 text-sm text-zinc-500">
@@ -51,17 +67,33 @@ export default function ChainsPage() {
 				/>
 			)}
 
-			{!loading && !error && data && data.length > 0 && (
-				<ul className="flex flex-col gap-5">
-					{data.map((chain, i) => (
-						<li
-							key={i}
-							className="overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-900/40 px-5 py-4"
-						>
-							<ChainGraph chain={chain} />
-						</li>
-					))}
-				</ul>
+			{!loading && !error && hero && (
+				<>
+					<section className="mb-10 overflow-x-auto rounded-xl border border-accent/30 bg-accent/4 px-6 py-6">
+						<p className="mb-4 text-sm text-zinc-300">
+							{summarize(hero)}
+						</p>
+						<ChainGraph chain={hero} />
+					</section>
+
+					{rest.length > 0 && (
+						<>
+							<h2 className="mb-4 text-xs font-medium uppercase tracking-wide text-zinc-500">
+								More chains
+							</h2>
+							<ul className="flex flex-col gap-5">
+								{rest.map((chain, i) => (
+									<li
+										key={i}
+										className="overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-900/40 px-5 py-4"
+									>
+										<ChainGraph chain={chain} />
+									</li>
+								))}
+							</ul>
+						</>
+					)}
+				</>
 			)}
 		</main>
 	);

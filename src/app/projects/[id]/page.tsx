@@ -71,10 +71,10 @@ export default function ProjectInfluencePage({
 			{!loading && !notFound && !project.error && project.data && (
 				<>
 					<header className="mb-10">
-						<p className="mb-2 text-xs font-medium uppercase tracking-wide text-emerald-400">
+						<p className="mb-2 text-xs font-medium uppercase tracking-wide text-accent">
 							Influence
 						</p>
-						<h1 className="text-2xl font-semibold text-zinc-50">
+						<h1 className="font-display text-2xl font-semibold text-zinc-50">
 							{project.data.name}
 						</h1>
 						<p className="mt-2 text-sm text-zinc-500">
@@ -114,7 +114,7 @@ export default function ProjectInfluencePage({
 											<span className="text-zinc-600">
 												taught →
 											</span>
-											<span className="rounded bg-emerald-900/40 px-2 py-0.5 text-emerald-300">
+											<span className="rounded bg-accent/15 px-2 py-0.5 text-accent">
 												{row.lessonTitle}
 											</span>
 											<span className="text-zinc-600">
@@ -130,7 +130,7 @@ export default function ProjectInfluencePage({
 						)}
 
 					<section className="mt-12">
-						<h2 className="mb-4 text-xs font-medium uppercase tracking-wide text-emerald-400">
+						<h2 className="mb-4 text-xs font-medium uppercase tracking-wide text-accent">
 							Taught forward
 						</h2>
 
@@ -160,7 +160,7 @@ export default function ProjectInfluencePage({
 											className="rounded-lg border border-zinc-800 bg-zinc-900/40 px-5 py-4"
 										>
 											<div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs">
-												<span className="rounded bg-emerald-900/40 px-2 py-0.5 text-emerald-300">
+												<span className="rounded bg-accent/15 px-2 py-0.5 text-accent">
 													{row.lessonTitle}
 												</span>
 												<span className="text-zinc-600">
