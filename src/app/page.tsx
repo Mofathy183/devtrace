@@ -9,10 +9,10 @@ import Link from 'next/link';
 export default function Home() {
 	return (
 		<main className="mx-auto flex max-w-3xl flex-1 flex-col justify-center px-6 py-24">
-			<p className="mb-3 text-xs font-medium uppercase tracking-wide text-emerald-400">
+			<p className="mb-3 text-xs font-medium uppercase tracking-wide text-accent">
 				Built on CognoDB
 			</p>
-			<h1 className="text-3xl font-semibold text-zinc-50">
+			<h1 className="font-display text-3xl font-semibold text-zinc-50">
 				DevTrace — an engineering decision graph
 			</h1>
 			<p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400">
@@ -25,7 +25,7 @@ export default function Home() {
 			<div className="mt-10 flex flex-col gap-3 sm:flex-row">
 				<Link
 					href="/projects"
-					className="rounded-md bg-emerald-500/10 px-5 py-3 text-center text-sm font-medium text-emerald-300 ring-1 ring-emerald-500/30 transition-colors hover:bg-emerald-500/15"
+					className="rounded-md bg-accent/10 px-5 py-3 text-center text-sm font-medium text-accent ring-1 ring-accent/30 transition-colors hover:bg-accent/15"
 				>
 					Browse projects
 				</Link>
