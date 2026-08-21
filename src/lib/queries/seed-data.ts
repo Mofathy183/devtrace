@@ -28,6 +28,8 @@ export type TechnologySeed = {
 		'Backend' | 'Frontend' | 'DevOps' | 'Security' | 'Testing' | 'Database';
 };
 
+export type SkillCategorySeed = { id: string; name: string };
+
 export type LessonSeed = {
 	id: string;
 	title: string;
@@ -85,6 +87,15 @@ export const technologies: TechnologySeed[] = [
 	{ id: 'nextjs', name: 'Next.js', category: 'Frontend' },
 	{ id: 'tailwind', name: 'Tailwind CSS', category: 'Frontend' },
 	{ id: 'shadcn', name: 'shadcn/ui', category: 'Frontend' },
+];
+
+export const skillCategories: SkillCategorySeed[] = [
+	{ id: 'backend', name: 'Backend' },
+	{ id: 'frontend', name: 'Frontend' },
+	{ id: 'devops', name: 'DevOps' },
+	{ id: 'security', name: 'Security' },
+	{ id: 'testing', name: 'Testing' },
+	{ id: 'database', name: 'Database' },
 ];
 
 // Project -> Technology (USES)
@@ -162,3 +173,20 @@ export const lessons: LessonSeed[] = [
 		informs: ['pyledger', 'ur-air'],
 	},
 ];
+
+const categoryIdByName: Record<TechnologySeed['category'], string> = {
+	Backend: 'backend',
+	Frontend: 'frontend',
+	DevOps: 'devops',
+	Security: 'security',
+	Testing: 'testing',
+	Database: 'database',
+};
+
+export const technologyBelongsToCategory: {
+	technology: string;
+	category: string;
+}[] = technologies.map((t) => ({
+	technology: t.id,
+	category: categoryIdByName[t.category],
+}));
