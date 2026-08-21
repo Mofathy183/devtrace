@@ -9,6 +9,7 @@
 		"lint": "eslint",
 		"format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,mjs}\"",
 		"format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,mjs}\"",
+		"type-check": "tsc --noEmit",
 		"seed": "tsx -r dotenv/config scripts/seed.ts dotenv_config_path=.env.local",
 		"test": "vitest run",
 		"test:watch": "vitest",

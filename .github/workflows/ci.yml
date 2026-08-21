@@ -26,7 +26,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Type check
-        run: pnpm exec tsc --noEmit
+        run: pnpm type-check
 
       - name: Lint
         run: pnpm lint
