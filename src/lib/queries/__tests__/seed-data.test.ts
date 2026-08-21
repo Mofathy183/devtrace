@@ -4,6 +4,8 @@ import {
 	technologies,
 	projectUses,
 	lessons,
+	skillCategories,
+	technologyBelongsToCategory,
 } from '@/lib/queries/seed-data';
 
 const projectIds = new Set(projects.map((p) => p.id));
@@ -55,5 +57,34 @@ describe('seed data referential integrity', () => {
 			l.informs.some((target) => projectsThatTeach.has(target))
 		);
 		expect(chainExists).toBe(true);
+	});
+});
+
+const categoryIds = new Set(skillCategories.map((c) => c.id));
+
+describe('skill category referential integrity', () => {
+	it('has no duplicate category ids', () => {
+		expect(categoryIds.size).toBe(skillCategories.length);
+	});
+
+	it('every technology has exactly one BELONGS_TO_CATEGORY edge', () => {
+		const withCategory = new Set(
+			technologyBelongsToCategory.map((r) => r.technology)
+		);
+		expect(withCategory.size).toBe(technologyIds.size);
+	});
+
+	it('every technologyBelongsToCategory.technology references a real technology id', () => {
+		const missing = technologyBelongsToCategory.filter(
+			(r) => !technologyIds.has(r.technology)
+		);
+		expect(missing).toEqual([]);
+	});
+
+	it('every technologyBelongsToCategory.category references a real category id', () => {
+		const missing = technologyBelongsToCategory.filter(
+			(r) => !categoryIds.has(r.category)
+		);
+		expect(missing).toEqual([]);
 	});
 });
