@@ -10,7 +10,9 @@ import {
 	technologies,
 	projectUses,
 	lessons,
-} from '../src/lib/queries/seed-data';
+	skillCategories,
+	technologyBelongsToCategory,
+} from '@/lib/queries/seed-data';
 
 async function main() {
 	const uri = process.env.COGNODB_URI;
@@ -45,6 +47,25 @@ async function main() {
 			`UNWIND $technologies AS t
        CREATE (:Technology {id: t.id, name: t.name, category: t.category})`,
 			{ technologies }
+		);
+
+		console.log(
+			`Creating ${skillCategories.length} SkillCategory nodes...`
+		);
+		await session.run(
+			`UNWIND $categories AS c
+   CREATE (:SkillCategory {id: c.id, name: c.name})`,
+			{ categories: skillCategories }
+		);
+
+		console.log(
+			`Creating ${technologyBelongsToCategory.length} BELONGS_TO_CATEGORY relationships...`
+		);
+		await session.run(
+			`UNWIND $rels AS r
+   MATCH (t:Technology {id: r.technology}), (c:SkillCategory {id: r.category})
+   CREATE (t)-[:BELONGS_TO_CATEGORY]->(c)`,
+			{ rels: technologyBelongsToCategory }
 		);
 
 		console.log(`Creating ${projectUses.length} USES relationships...`);
@@ -84,6 +105,9 @@ async function main() {
 		);
 		await session.run(
 			`CREATE INDEX technology_id IF NOT EXISTS FOR (t:Technology) ON (t.id)`
+		);
+		await session.run(
+			`CREATE INDEX skillcategory_id IF NOT EXISTS FOR (c:SkillCategory) ON (c.id)`
 		);
 
 		const countResult = await session.run(
